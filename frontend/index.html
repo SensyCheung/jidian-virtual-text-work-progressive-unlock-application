@@ -1,0 +1,131 @@
+<html lang='zh-CN'>
+    <head>
+        <meta charset='UTF-8' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <title>JiDian吉店 - 点滴资助，步步解锁</title>
+        <meta name='description' content='JiDian吉店 - 点滴资助，步步解锁。发布文字作品，实现渐进式内容解锁功能。' />
+        <meta name='keywords' content='JiDian吉店,文字作品,渐进解锁,ICP,区块链,资助' />
+        
+        <!-- Open Graph / Facebook -->
+        <meta property='og:type' content='website' />
+        <meta property='og:title' content='JiDian吉店 - 点滴资助，步步解锁' />
+        <meta property='og:description' content='发布文字作品，实现渐进式内容解锁功能。' />
+        <meta property='og:site_name' content='JiDian吉店' />
+        
+        <!-- Twitter -->
+        <meta name='twitter:card' content='summary_large_image' />
+        <meta name='twitter:title' content='JiDian吉店 - 点滴资助，步步解锁' />
+        <meta name='twitter:description' content='发布文字作品，实现渐进式内容解锁功能。' />
+        
+        <!-- Favicon and Icons -->
+        <link rel='icon' type='image/png' sizes='32x32' href='/assets/generated/jidian-favicon.dim_32x32.png' />
+        <link rel='icon' type='image/png' sizes='200x200' href='/assets/generated/jidian-logo-transparent.dim_200x200.png' />
+        <link rel='apple-touch-icon' sizes='180x180' href='/assets/generated/jidian-apple-touch-icon.dim_180x180.png' />
+        
+        <!-- Deep Link Redirect Script - Must run BEFORE app loads -->
+        <script>
+            (function() {
+                console.log('[DeepLink Init] Starting deep link detection');
+                console.log('[DeepLink Init] Current URL:', window.location.href);
+                console.log('[DeepLink Init] Pathname:', window.location.pathname);
+                console.log('[DeepLink Init] Search:', window.location.search);
+                
+                // Define dynamic route patterns that need normalization
+                const dynamicRoutes = [
+                    { pattern: /^\/article\/([^\/]+)$/, param: 'article' },
+                    { pattern: /^\/work\/([^\/]+)$/, param: 'work' },
+                    // Add more dynamic routes here as needed
+                ];
+                
+                const currentPath = window.location.pathname;
+                
+                // Skip normalization if already on homepage or static routes
+                if (currentPath === '/' || currentPath === '/about' || currentPath === '/settings' || currentPath === '/admin') {
+                    console.log('[DeepLink Init] Static route detected, no normalization needed');
+                    return;
+                }
+                
+                // Check if current path matches any dynamic route pattern
+                for (const route of dynamicRoutes) {
+                    const match = currentPath.match(route.pattern);
+                    if (match && match[1]) {
+                        const identifier = match[1];
+                        const normalizedUrl = `/?${route.param}=${encodeURIComponent(identifier)}`;
+                        
+                        console.log('[DeepLink Init] Dynamic route detected:', {
+                            originalPath: currentPath,
+                            pattern: route.pattern.toString(),
+                            identifier: identifier,
+                            normalizedUrl: normalizedUrl
+                        });
+                        
+                        // Use replaceState to normalize URL without reload
+                        // This ensures environment variables and canister IDs load properly
+                        window.history.replaceState(null, '', normalizedUrl);
+                        
+                        console.log('[DeepLink Init] URL normalized successfully');
+                        console.log('[DeepLink Init] New URL:', window.location.href);
+                        return;
+                    }
+                }
+                
+                console.log('[DeepLink Init] No dynamic route pattern matched, proceeding normally');
+            })();
+        </script>
+        
+        <!-- Eruda Mobile Debugging Console (admin-only) -->
+        <script>
+            (function() {
+                // Check if user is admin from localStorage
+                const isAdmin = localStorage.getItem('isAdmin') === 'true';
+                
+                console.log('[Eruda] Admin status check:', isAdmin);
+                
+                // Only load Eruda for admin users
+                if (!isAdmin) {
+                    console.log('[Eruda] User is not admin, Eruda will not be loaded');
+                    return;
+                }
+                
+                // Detect mobile device via user agent
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    console.log('[Eruda] Admin user on mobile device detected, loading eruda...');
+                    
+                    // Load eruda from CDN
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.min.js';
+                    script.onload = function() {
+                        if (window.eruda) {
+                            eruda.init();
+                            console.log('[Eruda] Initialized successfully for admin user');
+                            
+                            // Configure eruda position to bottom-right
+                            eruda.position({ x: window.innerWidth - 60, y: window.innerHeight - 60 });
+                            
+                            // Ensure eruda button stays on top and is visible
+                            const erudaEl = document.querySelector('.eruda-entry-btn');
+                            if (erudaEl) {
+                                erudaEl.style.zIndex = '999999';
+                                erudaEl.style.display = 'block';
+                                console.log('[Eruda] Entry button positioned at bottom-right and visible');
+                            }
+                        }
+                    };
+                    script.onerror = function() {
+                        console.error('[Eruda] Failed to load eruda script');
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    console.log('[Eruda] Admin user on desktop device, eruda not loaded');
+                }
+            })();
+        </script>
+    </head>
+    <body>
+        <div id='root'></div>
+        <script type='module' src='/src/main.tsx'></script>
+    </body>
+</html>
+
